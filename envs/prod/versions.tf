@@ -16,5 +16,3 @@ terraform {
     }
   }
 }
-
-#  teste runner

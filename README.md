@@ -45,8 +45,8 @@ Este repositório começa pela **Etapa 1**: estrutura inicial, backend remoto no
 
 Crie dois workspaces no HCP Terraform:
 
-- `fiap-infra-dev`
-- `fiap-infra-prod`
+- `api-oficina-dev`
+- `api-oficina-prod`
 
 Para cada workspace:
 
@@ -57,6 +57,12 @@ Para cada workspace:
    - prod: `envs/prod`
 4. Configure branch e políticas de apply conforme seu fluxo:
    - sugestão inicial: plans em PR, apply apenas em merge para `main`.
+
+## Decisão de arquitetura
+
+- O módulo `bootstrap` permanece no projeto como módulo base/foundation.
+- Ele continuará evoluindo para padrões comuns (naming, tags e convenções globais) sem acoplar recursos de negócio.
+- A próxima fase técnica será o módulo de `vpc`.
 
 ## Validação local antes do push
 

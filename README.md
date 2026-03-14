@@ -1,4 +1,6 @@
-# FIAP Infra - AWS + Terraform + HCP Terraform
+# Infra - AWS + Terraform + HCP Terraform
+
+Repositório GitHub: `FIAP-code-challenge/infra`.
 
 Este repositório começa pela **Etapa 1**: estrutura inicial, backend remoto no **HCP Terraform** (antigo Terraform Cloud) e integração com **GitHub** no modelo **VCS-driven**.
 
@@ -56,7 +58,7 @@ Para cada workspace:
    - dev: `envs/dev`
    - prod: `envs/prod`
 4. Configure branch e políticas de apply conforme seu fluxo:
-   - sugestão inicial: plans em PR, apply apenas em merge para `main`.
+   - sugestão inicial: plans em PR, apply apenas em merge para `develop`.
 
 ## Decisão de arquitetura
 
@@ -79,7 +81,7 @@ terraform -chdir=envs/prod validate
 ## Fluxo de Git sugerido
 
 - Branches curtas por feature: `feat/<tema>`
-- Pull Request para `main`
+- Pull Request para `develop`
 - Conventional Commits
 
 Exemplo de commit da Etapa 1:

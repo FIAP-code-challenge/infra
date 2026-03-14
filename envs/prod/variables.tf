@@ -45,3 +45,33 @@ variable "enable_nat_gateway" {
   type        = bool
   default     = true
 }
+
+variable "enable_ecs_role" {
+  description = "Cria roles IAM para ECS."
+  type        = bool
+  default     = false
+}
+
+variable "enable_lambda_role" {
+  description = "Cria role IAM para Lambda."
+  type        = bool
+  default     = false
+}
+
+variable "enable_github_oidc" {
+  description = "Cria OIDC provider e role para GitHub Actions."
+  type        = bool
+  default     = true
+}
+
+variable "github_org" {
+  description = "Organizacao GitHub para trust policy OIDC."
+  type        = string
+  default     = "FIAP-code-challenge"
+}
+
+variable "github_repo" {
+  description = "Repositorio GitHub para trust policy OIDC."
+  type        = string
+  default     = "infra"
+}

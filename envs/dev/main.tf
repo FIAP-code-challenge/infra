@@ -16,3 +16,15 @@ module "vpc" {
   enable_nat_gateway   = var.enable_nat_gateway
   tags                 = local.default_tags
 }
+
+module "iam" {
+  source = "../../modules/iam"
+
+  name_prefix        = local.name_prefix
+  enable_ecs_role    = var.enable_ecs_role
+  enable_lambda_role = var.enable_lambda_role
+  enable_github_oidc = var.enable_github_oidc
+  github_org         = var.github_org
+  github_repo        = var.github_repo
+  tags               = local.default_tags
+}

@@ -61,7 +61,7 @@ variable "enable_lambda_role" {
 variable "enable_github_oidc" {
   description = "Cria OIDC provider e role para GitHub Actions."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "github_org" {

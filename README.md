@@ -58,7 +58,7 @@ Para cada workspace:
    - dev: `envs/dev`
    - prod: `envs/prod`
 4. Configure branch e políticas de apply conforme seu fluxo:
-   - sugestão inicial: plans em PR, apply apenas em merge para `develop`.
+   - sugestão inicial: plans em PR, apply apenas em merge para `develop` e `main`.
 
 ## Decisão de arquitetura
 

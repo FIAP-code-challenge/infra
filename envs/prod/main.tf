@@ -26,5 +26,6 @@ module "iam" {
   enable_github_oidc = var.enable_github_oidc
   github_org         = var.github_org
   github_repo        = var.github_repo
+  github_oidc_allowed_subjects = var.github_oidc_allowed_subjects
   tags               = local.default_tags
 }

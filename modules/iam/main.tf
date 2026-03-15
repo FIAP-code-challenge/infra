@@ -1,5 +1,10 @@
 locals {
   base_tags = merge(var.tags, { module = "iam" })
+
+  github_oidc_subjects = length(var.github_oidc_allowed_subjects) > 0 ? var.github_oidc_allowed_subjects : [
+    "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/develop",
+    "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
+  ]
 }
 
 # ─────────────────────────────────────────────
@@ -100,7 +105,7 @@ data "aws_iam_policy_document" "github_oidc_assume_role" {
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_org}/${var.github_repo}:*"]
+      values   = local.github_oidc_subjects
     }
 
     condition {
@@ -111,12 +116,17 @@ data "aws_iam_policy_document" "github_oidc_assume_role" {
   }
 }
 
+data "tls_certificate" "github_actions" {
+  count = var.enable_github_oidc ? 1 : 0
+  url   = "https://token.actions.githubusercontent.com"
+}
+
 resource "aws_iam_openid_connect_provider" "github" {
   count = var.enable_github_oidc ? 1 : 0
 
   url             = "https://token.actions.githubusercontent.com"
   client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = ["6938fd4d98bab03faadb97b34396831e3780aea1"]
+  thumbprint_list = [data.tls_certificate.github_actions[0].certificates[0].sha1_fingerprint]
 
   tags = merge(local.base_tags, { Name = "${var.name_prefix}-github-oidc" })
 }

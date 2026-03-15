@@ -42,3 +42,23 @@ output "github_actions_role_arn" {
   description = "ARN da role GitHub Actions (OIDC)."
   value       = module.iam.github_actions_role_arn
 }
+
+output "ecr_repository_url" {
+  description = "URL do repositorio ECR da API."
+  value       = module.ecr.repository_url
+}
+
+output "ecs_cluster_name" {
+  description = "Nome do cluster ECS."
+  value       = module.ecs_service.cluster_name
+}
+
+output "ecs_service_name" {
+  description = "Nome do servico ECS da API."
+  value       = module.ecs_service.service_name
+}
+
+output "alb_dns_name" {
+  description = "DNS publico do ALB da API."
+  value       = module.ecs_service.alb_dns_name
+}

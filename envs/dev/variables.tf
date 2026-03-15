@@ -49,7 +49,7 @@ variable "enable_nat_gateway" {
 variable "enable_ecs_role" {
   description = "Cria roles IAM para ECS."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_lambda_role" {
@@ -83,4 +83,70 @@ variable "github_oidc_allowed_subjects" {
     "repo:FIAP-code-challenge/infra:ref:refs/heads/develop",
     "repo:FIAP-code-challenge/infra:ref:refs/heads/main"
   ]
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "Mutabilidade de tags no ECR."
+  type        = string
+  default     = "IMMUTABLE"
+}
+
+variable "ecr_scan_on_push" {
+  description = "Habilita scan ao enviar imagens para o ECR."
+  type        = bool
+  default     = true
+}
+
+variable "ecr_max_image_count" {
+  description = "Quantidade maxima de imagens mantidas no ECR."
+  type        = number
+  default     = 30
+}
+
+variable "ecr_force_delete" {
+  description = "Permite deletar repositorio ECR com imagens."
+  type        = bool
+  default     = true
+}
+
+variable "container_image_tag" {
+  description = "Tag da imagem da API no ECR."
+  type        = string
+  default     = "bootstrap"
+}
+
+variable "api_container_port" {
+  description = "Porta do container da API."
+  type        = number
+  default     = 8080
+}
+
+variable "ecs_desired_count" {
+  description = "Quantidade desejada de tasks ECS."
+  type        = number
+  default     = 0
+}
+
+variable "ecs_cpu" {
+  description = "CPU da task ECS Fargate."
+  type        = string
+  default     = "256"
+}
+
+variable "ecs_memory" {
+  description = "Memoria da task ECS Fargate."
+  type        = string
+  default     = "512"
+}
+
+variable "alb_health_check_path" {
+  description = "Path de health check do ALB."
+  type        = string
+  default     = "/health"
+}
+
+variable "ecs_log_retention_days" {
+  description = "Retencao de logs da API no CloudWatch."
+  type        = number
+  default     = 14
 }

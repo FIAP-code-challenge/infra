@@ -7,5 +7,6 @@ Exemplos de módulos planejados:
 - `bootstrap`
 - `vpc`
 - `iam`
+- `ecr`
 - `ecs_service`
 - `lambda_api`

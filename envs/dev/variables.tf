@@ -29,7 +29,7 @@ variable "availability_zones" {
 }
 
 variable "public_subnet_cidrs" {
-  description = "CIDRs das subnets publicas do ambiente."
+  description = "CIDRs das subnets públicas do ambiente."
   type        = list(string)
   default     = ["10.10.0.0/20", "10.10.16.0/20"]
 }
@@ -74,4 +74,13 @@ variable "github_repo" {
   description = "Repositorio GitHub para trust policy OIDC."
   type        = string
   default     = "infra"
+}
+
+variable "github_oidc_allowed_subjects" {
+  description = "Allowlist de subjects do OIDC para GitHub Actions."
+  type        = list(string)
+  default = [
+    "repo:FIAP-code-challenge/infra:ref:refs/heads/develop",
+    "repo:FIAP-code-challenge/infra:ref:refs/heads/main"
+  ]
 }

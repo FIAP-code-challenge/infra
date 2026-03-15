@@ -14,7 +14,7 @@ output "vpc_id" {
 }
 
 output "public_subnet_ids" {
-  description = "IDs das subnets publicas do ambiente."
+  description = "IDs das subnets públicas do ambiente."
   value       = module.vpc.public_subnet_ids
 }
 

@@ -9,17 +9,17 @@ output "vpc_cidr" {
 }
 
 output "public_subnet_ids" {
-  description = "IDs das subnets publicas."
-  value       = [for subnet in values(aws_subnet.public) : subnet.id]
+  description = "IDs das subnets públicas."
+  value       = [for az in var.azs : aws_subnet.public[az].id]
 }
 
 output "private_subnet_ids" {
   description = "IDs das subnets privadas."
-  value       = [for subnet in values(aws_subnet.private) : subnet.id]
+  value       = [for az in var.azs : aws_subnet.private[az].id]
 }
 
 output "public_route_table_id" {
-  description = "ID da route table publica."
+  description = "ID da route table pública."
   value       = aws_route_table.public.id
 }
 

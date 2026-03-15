@@ -6,18 +6,18 @@ locals {
   private_subnet_cidrs = length(var.private_subnet_cidrs) > 0 ? var.private_subnet_cidrs : local.computed_private_subnet_cidrs
 
   public_subnets_by_az = {
-    for idx, az in var.azs :
+     for az, cidr in zipmap(var.azs, local.public_subnet_cidrs) :
     az => {
       az   = az
-      cidr = local.public_subnet_cidrs[idx]
+       cidr = cidr
     }
   }
 
   private_subnets_by_az = {
-    for idx, az in var.azs :
+    for az, cidr in zipmap(var.azs, local.private_subnet_cidrs) :
     az => {
       az   = az
-      cidr = local.private_subnet_cidrs[idx]
+      cidr = cidr
     }
   }
 
@@ -33,6 +33,13 @@ resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
+
+   lifecycle {
+     precondition {
+       condition     = 2 * length(var.azs) <= 16
+       error_message = "This VPC module supports at most 8 availability zones with the current subnetting scheme (newbits = 4). Reduce the number of AZs or update the module to use a larger subnetting space."
+     }
+   }
 
   tags = merge(
     local.base_tags,
@@ -127,7 +134,7 @@ resource "aws_nat_gateway" "this" {
   count = var.enable_nat_gateway ? 1 : 0
 
   allocation_id = aws_eip.nat[0].id
-  subnet_id     = values(aws_subnet.public)[0].id
+  subnet_id     = aws_subnet.public[var.azs[0]].id
 
   tags = merge(
     local.base_tags,
@@ -135,6 +142,13 @@ resource "aws_nat_gateway" "this" {
       Name = "${var.name_prefix}-nat"
     }
   )
+
+   lifecycle {
+     precondition {
+       condition     = !var.enable_nat_gateway || length(var.azs) > 0
+       error_message = "enable_nat_gateway requires at least one AZ/public subnet (var.azs must not be empty)."
+     }
+   }
 
   depends_on = [aws_internet_gateway.this]
 }

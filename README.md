@@ -1,12 +1,17 @@
 # Infra - AWS + Terraform + HCP Terraform
 
-Repositório GitHub: `FIAP-code-challenge/infra`.
+Repositorio GitHub: `FIAP-code-challenge/infra`
 
-Este repositório começa pela **Etapa 1**: estrutura inicial, backend remoto no **HCP Terraform** (antigo Terraform Cloud) e integração com **GitHub** no modelo **VCS-driven**.
+Projeto de infraestrutura modular em AWS com Terraform, backend remoto no HCP Terraform e separacao por ambientes (`dev` e `prod`).
 
-> Escopo desta etapa: **não** criar recursos AWS ainda. Somente fundação, versionamento e fluxo de execução.
+## Status Atual
 
-## Estrutura do projeto
+- Etapa 1: concluida (estrutura base + backend remoto HCP + integracao com GitHub)
+- Etapa 2: concluida (modulo `vpc` integrado em `dev` e `prod`)
+- Etapa 3: concluida (modulo `iam` integrado em `dev` e `prod`)
+- OIDC GitHub Actions: implementado no codigo, porem desabilitado por padrao nos ambientes devido restricao de permissao IAM na conta atual
+
+## Estrutura do Projeto
 
 ```text
 .
@@ -26,66 +31,110 @@ Este repositório começa pela **Etapa 1**: estrutura inicial, backend remoto no
 │       ├── locals.tf
 │       └── outputs.tf
 └── modules/
-    └── README.md
+      ├── bootstrap/
+      ├── vpc/
+      ├── iam/
+      └── README.md
 ```
 
-## Teoria rápida (Etapa 1)
+## Ambientes e State Remoto
 
-- `envs/dev` e `envs/prod` isolam configuração e state por ambiente.
-- `modules/` será a base de reuso (VPC, IAM, ECS/Lambda, etc.) nas próximas etapas.
-- O bloco `cloud` em `versions.tf` conecta o state ao HCP Terraform.
-- O modo VCS-driven usa o GitHub para disparar `plan/apply` no HCP por PR/merge.
-- Mesmo em VCS-driven, você valida localmente antes do push com `fmt/init/validate`.
+Workspaces HCP Terraform:
 
-## Pré-requisitos
+- `api-oficina-dev` (working directory: `envs/dev`)
+- `api-oficina-prod` (working directory: `envs/prod`)
 
-- Terraform CLI instalado (versão recente).
-- Conta no HCP Terraform com organização criada.
-- Repositório no GitHub.
+Organizacao HCP:
 
-## Configuração no HCP Terraform (VCS-driven)
+- `FIAP-tech-challenge-oficina`
 
-Crie dois workspaces no HCP Terraform:
+Observacao:
 
-- `api-oficina-dev`
-- `api-oficina-prod`
+- O `tfstate` e versionado no HCP Terraform (nao local).
 
-Para cada workspace:
+## Modulos Implementados
 
-1. Conecte o VCS provider GitHub (GitHub App).
-2. Aponte para este repositório.
-3. Defina o **Working Directory**:
-   - dev: `envs/dev`
-   - prod: `envs/prod`
-4. Configure branch e políticas de apply conforme seu fluxo:
-   - sugestão inicial: plans em PR, apply apenas em merge para `develop`.
+### bootstrap
 
-## Decisão de arquitetura
+Modulo foundation/base do projeto para padrao inicial e evolucao de convencoes globais.
 
-- O módulo `bootstrap` permanece no projeto como módulo base/foundation.
-- Ele continuará evoluindo para padrões comuns (naming, tags e convenções globais) sem acoplar recursos de negócio.
-- A próxima fase técnica será o módulo de `vpc`.
+### vpc
 
-## Validação local antes do push
+Cria a camada de rede base:
+
+- VPC
+- Subnets publicas e privadas multi-AZ
+- Internet Gateway
+- Route tables e associacoes
+- NAT Gateway opcional por ambiente
+
+Defaults atuais:
+
+- `dev`: NAT desligado
+- `prod`: NAT ligado
+
+### iam
+
+Cria identidades base por feature flag:
+
+- role ECS task execution
+- role ECS task
+- role Lambda execution
+- OIDC provider + role GitHub Actions (quando habilitado)
+
+Hardening implementado para OIDC:
+
+- allowlist configuravel para `sub` (`github_oidc_allowed_subjects`)
+- fallback seguro para branches `develop` e `main`
+- validacao de entrada para evitar configuracao incompleta
+
+## Fluxo de Trabalho
+
+1. Alterar codigo em branch de feature/fix.
+2. Rodar validacoes locais (`fmt`, `validate`, `plan`).
+3. Abrir Pull Request.
+4. Executar plan no HCP Terraform.
+5. Aplicar (quando aprovado) conforme politica do workspace.
+
+## Comandos de Validacao Local
 
 ```bash
 terraform -chdir=envs/dev init
 terraform -chdir=envs/dev fmt -recursive
 terraform -chdir=envs/dev validate
+terraform -chdir=envs/dev plan
 
 terraform -chdir=envs/prod init
 terraform -chdir=envs/prod fmt -recursive
 terraform -chdir=envs/prod validate
+terraform -chdir=envs/prod plan
 ```
 
-## Fluxo de Git sugerido
+## Seguranca e Observacoes Importantes
 
-- Branches curtas por feature: `feat/<tema>`
-- Pull Request para `develop`
+- OIDC (`enable_github_oidc`) esta `false` por padrao em `dev` e `prod` para evitar falha de apply em contas sem permissao `iam:CreateOpenIDConnectProvider`.
+- Para habilitar OIDC, e necessario:
+   - permissao IAM adequada para criar OIDC provider e role
+   - configurar `enable_github_oidc = true`
+   - definir/revisar `github_oidc_allowed_subjects`
+
+## Proxima Etapa (Etapa 4)
+
+Implementar camada de execucao da API com foco em:
+
+- modulo ECR (repositorio de imagem)
+- modulo ECS Fargate (cluster, service, task definition, logs)
+- ALB + Security Groups
+- integracao com VPC e IAM ja provisionados
+
+## Convencoes de Git
+
+- Branches curtas (`feat/...`, `fix/...`)
+- PR para branch de integracao do time
 - Conventional Commits
 
-Exemplo de commit da Etapa 1:
+Exemplo:
 
 ```text
-chore(terraform): bootstrap estrutura inicial com backend remoto no hcp
+feat(iam): adicionar allowlist configuravel para subjects do github oidc
 ```
